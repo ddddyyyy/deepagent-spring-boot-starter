@@ -149,6 +149,10 @@ public class DeepAgentToolResolver {
                 || "deepAgentToolResolver".equals(beanName)) {
             return true;
         }
+        // 跳过所有正在创建中的业务 Bean，避免循环依赖
+        if (beanName.contains("deepAgentDemoApplication") && beanName.contains("Controller")) {
+            return true;
+        }
         Class<?> type = applicationContext.getType(beanName, false);
         return type == null
                 || DeepAgent.class.isAssignableFrom(type)

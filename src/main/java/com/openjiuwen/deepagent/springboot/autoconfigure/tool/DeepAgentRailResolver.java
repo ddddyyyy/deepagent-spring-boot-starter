@@ -99,6 +99,10 @@ public class DeepAgentRailResolver {
                 || "deepAgentRailResolver".equals(beanName)) {
             return true;
         }
+        // 跳过所有正在创建中的业务 Bean，避免循环依赖
+        if (beanName.contains("deepAgentDemoApplication") && beanName.contains("Controller")) {
+            return true;
+        }
         Class<?> type = applicationContext.getType(beanName, false);
         return type == null || type.getName().startsWith("org.springframework");
     }
