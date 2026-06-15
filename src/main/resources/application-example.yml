@@ -1,0 +1,98 @@
+# ============================================================
+# DeepAgent Spring Boot Starter 完整配置示例（YAML 格式）
+# ============================================================
+deep-agent:
+  enabled: true
+  language: cn
+  workspace-path: ./workspace
+  system-prompt: |
+    你是一个中文智能体助手，请基于用户问题给出准确、简洁、可执行的回答。
+  max-iterations: 15
+  task-loop-enabled: true
+  task-planning-enabled: false
+  restrict-to-work-dir: false
+  ensure-initialized: false
+
+  # AgentCard 信息
+  agent-card:
+    id: deep_agent
+    name: DeepAgent
+    description: Dynamic Planning Deep Agent
+
+  # 系统操作配置（文件读写、shell、代码执行）
+  sys-operation:
+    enabled: true
+    id: deep_agent_sys_operation
+    name: deep_agent_sys_operation
+    work-dir: ./workspace
+    restrict-to-sandbox: false
+    inject-tools: true
+    shell-allowlist:
+      - echo
+      - ls
+      - cat
+      - curl
+    sandbox-root:
+      - /tmp/sandbox
+    dangerous-patterns:
+      - rm.*-rf.*/
+
+  # 内置 Rail 控制
+  rails:
+    skill-use-enabled: true
+    sys-operation-enabled: true
+    scan-annotated: true
+    bean-names:
+      - taskExecutionRail
+    class-names:
+      - com.example.plugin.CustomRail
+
+  # 模型配置（backend 定义服务端连接，model 定义模型参数）
+  backend:
+    client_provider: openai
+    api_key: ${DEEPSEEK_API_KEY}
+    api_base: https://api.deepseek.com
+  model:
+    model: deepseek-v4-flash
+    thinking:
+      type: disabled
+
+  # 自定义请求 header（写入内部 ReActAgentConfig.customHeaders）
+  headers:
+    X-Tenant-Id: tenant-a
+    X-Trace-Source: spring-boot
+
+  # DeepAgent 内部行为控制
+  react-agent:
+    enabled: true
+    clear-llm: true
+    prompt: |
+      你是一个中文智能体助手，请基于用户问题给出准确、简洁、可执行的回答。
+
+  # Skill 目录
+  skill-directories:
+    - ./skills
+  skill-mode: auto_list
+
+  # Tool 注册方式
+  tools:
+    scan-annotated-beans: true
+    bean-names:
+      - orderTools
+    class-names:
+      - com.example.agent.tools.CommonTools
+
+  # 流式模式
+  stream-modes:
+    - OUTPUT
+
+  # 额外 Prompt 段落
+  extra-prompt-sections:
+    - name: custom_guidance
+      priority: 60
+      content:
+        cn: |
+          请优先使用本地 skill 处理问题。
+
+  # 权限配置
+  permissions: {}
