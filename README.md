@@ -370,6 +370,65 @@ public void chat(String sessionId, String question) {
 }
 ```
 
+## 配置项说明
+
+### 基础设置
+
+| 配置路径 | 说明 | 默认值 |
+|---|---|---|
+| `deep-agent.enabled` | 是否启用 DeepAgent 自动装配 | `true` |
+| `deep-agent.language` | 智能体语言，可选 `cn`（中文）或 `en`（英文） | `cn` |
+| `deep-agent.workspace-path` | 智能体工作目录路径 | `./` |
+| `deep-agent.system-prompt` | 系统提示词 | （默认提示词） |
+| `deep-agent.max-iterations` | 最大迭代次数 | `15` |
+| `deep-agent.task-loop-enabled` | 是否启用任务循环模式 | `true` |
+| `deep-agent.task-planning-enabled` | 是否启用任务规划模式 | `false` |
+| `deep-agent.restrict-to-work-dir` | 是否限制智能体只在工作目录内操作 | `true` |
+| `deep-agent.ensure-initialized` | 是否在启动时调用 ensureInitialized() | `false` |
+
+### 异步与多智能体
+
+| 配置路径 | 说明 | 默认值 |
+|---|---|---|
+| `deep-agent.async-subagent-enabled` | 启用异步子智能体，允许主智能体并发调度多个子任务 | `false` |
+| `deep-agent.general-purpose-agent-enabled` | 启用通用智能体，作为备用智能体处理主智能体无法处理的任务 | `false` |
+
+### 超时控制
+
+| 配置路径 | 说明 | 默认值 |
+|---|---|---|
+| `deep-agent.completion-timeout` | 智能体单次完成的超时时间（秒），超过后自动终止 | 无（不超时） |
+
+### 流式输出
+
+| 配置路径 | 说明 | 默认值 |
+|---|---|---|
+| `deep-agent.stream-modes` | 流式输出模式列表，可选 `OUTPUT`、`THINKING`、`TOOL_CALL`、`FULL` | `[OUTPUT]` |
+
+### 额外 Prompt 段落
+
+通过 `extra-prompt-sections` 可以向系统提示词中插入自定义段落，控制智能体的行为倾向。
+
+```yaml
+deep-agent:
+  extra-prompt-sections:
+    - name: custom_guidance
+      priority: 60
+      content:
+        cn: |
+          请优先使用本地 skill 处理问题。
+        en: |
+          Please prioritize local skills for problem solving.
+```
+
+每个段落包含：
+
+- `name`：段落名称，用于程序识别和替换
+- `priority`：优先级，数值越大越靠前
+- `content.cn`：中文提示内容
+- `content.en`：英文提示内容（可选，不配置时中文也用于英文模式）
+
+
 ## 设计约定
 
 - 默认单例，不需要每个请求重新初始化。
