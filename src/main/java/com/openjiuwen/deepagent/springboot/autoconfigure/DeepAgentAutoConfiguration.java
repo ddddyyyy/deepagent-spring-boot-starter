@@ -1,6 +1,7 @@
 package com.openjiuwen.deepagent.springboot.autoconfigure;
 
 import com.openjiuwen.deepagent.springboot.autoconfigure.client.DeepAgentClient;
+import com.openjiuwen.deepagent.springboot.autoconfigure.prompt.PromptProvider;
 import com.openjiuwen.deepagent.springboot.autoconfigure.properties.DeepAgentSpringProperties;
 import com.openjiuwen.deepagent.springboot.autoconfigure.tool.DeepAgentHeaderConfigurer;
 import com.openjiuwen.deepagent.springboot.autoconfigure.tool.DeepAgentRailResolver;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Spring Boot 自动装配入口。
@@ -49,11 +51,27 @@ public class DeepAgentAutoConfiguration {
     public DeepAgent deepAgent(
             DeepAgentSpringProperties properties,
             DeepAgentToolResolver toolResolver,
-            DeepAgentRailResolver railResolver
+            DeepAgentRailResolver railResolver,
+            Optional<PromptProvider> promptProvider
     ) {
         log.info("[DeepAgent Starter] 开始初始化 DeepAgent...");
         log.info("[DeepAgent Starter] Agent ID: {}, workspace: {}",
                 properties.getAgentCard().getId(), properties.getWorkspacePath());
+
+        // 优先使用 PromptProvider（用户自定义，可从文件/数据库加载）
+        String effectivePrompt = null;
+        if (promptProvider.isPresent()) {
+            effectivePrompt = promptProvider.get().getSystemPrompt();
+            log.info("[DeepAgent Starter] 使用 PromptProvider 注入的提示词");
+        }
+        if (effectivePrompt == null || effectivePrompt.isBlank()) {
+            effectivePrompt = properties.getReactAgent() != null
+                    && properties.getReactAgent().getPrompt() != null
+                    && !properties.getReactAgent().getPrompt().isBlank()
+                    ? properties.getReactAgent().getPrompt()
+                    : properties.getSystemPrompt();
+            log.info("[DeepAgent Starter] 使用配置文件的提示词");
+        }
 
         // 创建 SysOperation
         log.info("[DeepAgent Starter] 创建 SysOperation ...");
@@ -93,7 +111,7 @@ public class DeepAgentAutoConfiguration {
         // 配置内部 ReActAgent
         log.info("[DeepAgent Starter] 配置内部 ReActAgent ...");
         DeepAgentHeaderConfigurer.configure(agent, properties.getHeaders());
-        DeepAgentHeaderConfigurer.configureReActAgent(agent, properties);
+        DeepAgentHeaderConfigurer.configureReActAgent(agent, properties, effectivePrompt);
         log.info("[DeepAgent Starter] ReActAgent 配置完成");
 
         // 注入 SysOperation 工具

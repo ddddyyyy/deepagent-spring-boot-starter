@@ -32,8 +32,10 @@ public final class DeepAgentHeaderConfigurer {
         throw new IllegalStateException("DeepAgent internal ReActAgent config is not ReActAgentConfig");
     }
 
-    /** 按配置重新配置内部 ReActAgent（提示词、模型客户端、迭代次数、header）。 */
-    public static void configureReActAgent(DeepAgent deepAgent, DeepAgentSpringProperties properties) {
+    /** 按配置重新配置内部 ReActAgent（使用外部传入的提示词）。 */
+    public static void configureReActAgent(
+            DeepAgent deepAgent, DeepAgentSpringProperties properties, String effectivePrompt
+    ) {
         if (deepAgent == null
                 || properties.getReactAgent() == null
                 || !properties.getReactAgent().isEnabled()) {
@@ -43,7 +45,7 @@ public final class DeepAgentHeaderConfigurer {
         ReActAgentConfig reactConfig = ReActAgentConfig.builder()
                 .promptTemplate(List.of(Map.of(
                         "role", "system",
-                        "content", resolvePrompt(properties)
+                        "content", effectivePrompt
                 )))
                 .maxIterations(properties.getMaxIterations())
                 .build()
@@ -66,15 +68,6 @@ public final class DeepAgentHeaderConfigurer {
             // 清除 LLM 缓存，让内部 ReActAgent 重新按 config 创建模型客户端
             inner.setLlm(null);
         }
-    }
-
-    /** 获取提示词：react-agent.prompt 优先，否则用 systemPrompt。 */
-    private static String resolvePrompt(DeepAgentSpringProperties properties) {
-        String prompt = properties.getReactAgent().getPrompt();
-        if (prompt != null && !prompt.isBlank()) {
-            return prompt;
-        }
-        return properties.getSystemPrompt();
     }
 
     /** 判断 backend+model 是否提供了完整的模型客户端参数。 */
