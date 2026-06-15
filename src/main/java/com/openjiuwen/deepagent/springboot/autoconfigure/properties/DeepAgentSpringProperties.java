@@ -30,7 +30,6 @@ public class DeepAgentSpringProperties {
     private Map<String, Object> model = new LinkedHashMap<>();
     private Map<String, Object> backend = new LinkedHashMap<>();
     private Map<String, String> headers = new LinkedHashMap<>();
-    private Map<String, Object> permissions = new LinkedHashMap<>();
     private List<Map<String, Object>> extraPromptSections = new ArrayList<>();
     private List<String> streamModes = List.of("OUTPUT");
     private ToolProperties tools = new ToolProperties();
@@ -173,14 +172,6 @@ public class DeepAgentSpringProperties {
 
     public void setHeaders(Map<String, String> headers) {
         this.headers = headers;
-    }
-
-    public Map<String, Object> getPermissions() {
-        return permissions;
-    }
-
-    public void setPermissions(Map<String, Object> permissions) {
-        this.permissions = permissions;
     }
 
     public List<Map<String, Object>> getExtraPromptSections() {

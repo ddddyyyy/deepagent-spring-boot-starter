@@ -143,9 +143,6 @@ deep-agent:
         cn: |
           请优先使用本地 skill 处理问题。
 
-  # 权限配置
-  permissions: {}
-```
 
 ## 初始化链路
 

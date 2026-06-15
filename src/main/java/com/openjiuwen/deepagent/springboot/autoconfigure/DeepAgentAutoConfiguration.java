@@ -181,7 +181,6 @@ public class DeepAgentAutoConfiguration {
                 .skillMode(properties.getSkillMode())
                 .model(copyMap(properties.getModel()))
                 .backend(copyMap(properties.getBackend()))
-                .permissions(copyMap(properties.getPermissions()))
                 .tools(tools)
                 .rails(rails)
                 .sysOperation(sysOperation)
