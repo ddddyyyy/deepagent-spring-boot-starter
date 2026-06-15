@@ -10,6 +10,8 @@ import org.springframework.util.ClassUtils;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * DeepAgent Rail 解析器。
@@ -17,6 +19,7 @@ import java.util.List;
  * 并加载 @AgentRail Bean、配置指定和类名指定的自定义 Rail。
  */
 public class DeepAgentRailResolver {
+    private static final Logger log = LoggerFactory.getLogger(DeepAgentRailResolver.class);
     private final ApplicationContext applicationContext;
     private final DeepAgentSpringProperties properties;
 
@@ -54,6 +57,7 @@ public class DeepAgentRailResolver {
             Object bean = applicationContext.getBean(beanName);
             if (bean.getClass().isAnnotationPresent(AgentRail.class)) {
                 rails.add(bean);
+                log.info("[DeepAgent Starter] 从 Bean [{}] 扫描到 Rail: {}", beanName, bean.getClass().getSimpleName());
             }
         }
     }
@@ -65,7 +69,9 @@ public class DeepAgentRailResolver {
         }
         for (String beanName : properties.getRails().getBeanNames()) {
             if (beanName != null && !beanName.isBlank()) {
-                rails.add(applicationContext.getBean(beanName));
+                Object bean = applicationContext.getBean(beanName);
+                rails.add(bean);
+                log.info("[DeepAgent Starter] 通过 bean-name [{}] 注册 Rail: {}", beanName, bean.getClass().getSimpleName());
             }
         }
     }
@@ -84,7 +90,9 @@ public class DeepAgentRailResolver {
                 Class<?> clazz = ClassUtils.forName(className, classLoader);
                 Constructor<?> constructor = clazz.getDeclaredConstructor();
                 constructor.setAccessible(true);
-                rails.add(constructor.newInstance());
+                Object instance = constructor.newInstance();
+                rails.add(instance);
+                log.info("[DeepAgent Starter] 通过 class-name [{}] 注册 Rail: {}", className, clazz.getSimpleName());
             } catch (ReflectiveOperationException e) {
                 throw new IllegalArgumentException("无法加载配置的 Rail 类: " + className, e);
             }

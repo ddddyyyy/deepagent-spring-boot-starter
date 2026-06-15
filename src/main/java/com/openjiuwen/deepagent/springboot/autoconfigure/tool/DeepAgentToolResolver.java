@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * DeepAgent Tool 解析器。
@@ -26,6 +28,7 @@ import java.util.Map;
  * 3. 通过 classNames 精确指定工具类
  */
 public class DeepAgentToolResolver {
+    private static final Logger log = LoggerFactory.getLogger(DeepAgentToolResolver.class);
     private final ApplicationContext applicationContext;
     private final DeepAgentSpringProperties properties;
 
@@ -53,7 +56,15 @@ public class DeepAgentToolResolver {
                 continue;
             }
             Object bean = applicationContext.getBean(beanName);
+            int before = tools.size();
             addToolsFromTarget(tools, bean);
+            int added = tools.size() - before;
+            if (added > 0) {
+                List<String> names = new ArrayList<>();
+                tools.values().stream().skip(tools.size() - added).forEach(
+                    t -> names.add(t instanceof Tool tool ? tool.getCard().getName() : t.getClass().getSimpleName()));
+                log.info("[DeepAgent Starter] 从 Bean [{}] 扫描到 {} 个 Tool: {}", beanName, added, names);
+            }
         }
     }
 
@@ -69,9 +80,18 @@ public class DeepAgentToolResolver {
             Object bean = applicationContext.getBean(beanName);
             if (bean instanceof Tool tool) {
                 tools.put(tool.getCard().getName(), tool);
+                log.info("[DeepAgent Starter] 通过 bean-name [{}] 注册 Tool: {}", beanName, tool.getCard().getName());
                 continue;
             }
+            int before = tools.size();
             addToolsFromTarget(tools, bean);
+            int added = tools.size() - before;
+            if (added > 0) {
+                List<String> names = new ArrayList<>();
+                tools.values().stream().skip(tools.size() - added).forEach(
+                    t -> names.add(t instanceof Tool tool ? tool.getCard().getName() : t.getClass().getSimpleName()));
+                log.info("[DeepAgent Starter] 从 bean-name [{}] 扫描到 {} 个 Tool: {}", beanName, added, names);
+            }
         }
     }
 
@@ -88,9 +108,18 @@ public class DeepAgentToolResolver {
             Object target = instantiate(className, classLoader);
             if (target instanceof Tool tool) {
                 tools.put(tool.getCard().getName(), tool);
+                log.info("[DeepAgent Starter] 通过 class-name [{}] 注册 Tool: {}", className, tool.getCard().getName());
                 continue;
             }
+            int before = tools.size();
             addToolsFromTarget(tools, target);
+            int added = tools.size() - before;
+            if (added > 0) {
+                List<String> names = new ArrayList<>();
+                tools.values().stream().skip(tools.size() - added).forEach(
+                    t -> names.add(t instanceof Tool t2 ? t2.getCard().getName() : t.getClass().getSimpleName()));
+                log.info("[DeepAgent Starter] 从 class-name [{}] 扫描到 {} 个 Tool: {}", className, added, names);
+            }
         }
     }
 
