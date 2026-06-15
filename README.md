@@ -18,6 +18,7 @@ request/
 tool/
   DeepAgentToolResolver             Tool 扫描与配置解析
   DeepAgentHeaderConfigurer         内部 ReActAgent 配置（模型客户端、自定义 header、提示词）
+  PromptProvider                   提示词提供者接口，支持从文件/数据库/远程加载系统提示词
   DeepAgentRailResolver             Rail 解析与创建
   DeepAgentSysOperationSupport      SysOperation 创建与工具注入
 ```
@@ -429,7 +430,29 @@ deep-agent:
 - `content.en`：英文提示内容（可选，不配置时中文也用于英文模式）
 
 
+## 自定义提示词
+
+如果系统提示词需要从文件、数据库或远程接口动态加载，可以实现 `PromptProvider` 接口并注册为 Spring Bean。
+
+```java
+@Component
+public class FilePromptProvider implements PromptProvider {
+    @Override
+    public String getSystemPrompt() {
+        try {
+            return Files.readString(Path.of("/etc/deepagent/prompt.md"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
+```
+
+优先级顺序：**PromptProvider Bean → react-agent.prompt 配置 → system-prompt 配置**。
+如果 `PromptProvider` 返回 null 或空字符串，自动回退到配置文件。
+
 ## 设计约定
+
 
 - 默认单例，不需要每个请求重新初始化。
 - `conversationId` 为必填，不同会话使用不同的 ID，避免上下文串。
