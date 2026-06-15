@@ -1,0 +1,7 @@
+target/
+*.iml
+.idea/
+logs/
+*.class
+*.jar
+!target/deepagent-spring-boot-starter-0.1.12-SNAPSHOT.jar
