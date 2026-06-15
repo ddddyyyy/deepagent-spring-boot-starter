@@ -173,6 +173,9 @@ deep-agent:
 
 ### 方式一：注解自动扫描（推荐）
 
+> **注意**：注解扫描基于 Spring Bean 进行，带 `@AgentRail` 的类必须先注册为 Spring Bean（如添加 `@Component`），否则不会被扫描到。
+> 如果类无法注册为 Bean，请使用方式二（`bean-names`）或方式三（`class-names`）。
+
 在 Spring Bean 类上添加 `@AgentRail`，继承 `DeepAgentRail`：
 
 ```java
