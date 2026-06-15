@@ -282,6 +282,9 @@ skills/
 
 ### 方式一：注解扫描（默认开启）
 
+> **注意**：注解扫描基于 Spring Bean 进行，带 `@ToolDefinition` 的类必须先注册为 Spring Bean（如添加 `@Component`），否则不会被扫描到。
+> 如果类无法注册为 Bean，请使用方式二（`class-names` 配置）。
+
 在 Spring Bean 方法上使用 `@ToolDefinition`：
 
 ```java
